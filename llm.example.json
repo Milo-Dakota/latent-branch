@@ -1,0 +1,7 @@
+{
+  "model": "qwen-flash",
+  "base_url": "填写百炼控制台提供的兼容 Base URL，不含 /chat/completions",
+  "api_key": "填写你自己的 API Key",
+  "token_field": "max_tokens",
+  "enable_thinking": false
+}

@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "narrative-game"
+version = "0.1.0"
+description = "A local LLM narrative engine with counterfactual search"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+narrative-game = "narrative_game.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["narrative_game*"]

@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+*.egg-info/
+.venv/
+.env
+llm.local.json
+llm.local.json.tmp
+saves/
+dist/
+build/

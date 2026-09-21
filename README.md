@@ -1,4 +1,8 @@
-# LLM 动态文字游戏原型
+# 潜枝 · Latent Branch
+
+> 一个通过反事实探索生长隐藏世界的 LLM 动态叙事引擎。
+
+An LLM-powered narrative game engine that grows hidden worlds through counterfactual exploration.
 
 这个项目是一个本地文字世界运行器：玩家加载初始世界设定，在场景中选择行动；程序管理真实世界状态，LLM 生成行动结果和后续选项，再通过轻量反事实搜索提出可复用的隐藏背景。
 

@@ -4,7 +4,8 @@ from .context import ContextBuilder
 from .distill import HiddenWorldDistiller
 from .llm import Budget, LLM, Session
 from .mcts import NarrativeMCTS, SearchConfig
-from .models import GameError, WorldState, apply_transition, digest, mapping, text, validate_transition
+from .models import GameError, WorldState, apply_transition, digest, mapping, text, validate_real_transition
+from .prompts import PROMPT_VERSION
 from .storage import Storage
 
 
@@ -41,14 +42,14 @@ class GameController:
         repair_count = 0
         candidate_warnings = []
         try:
-            transition = validate_transition(raw, state, candidate_warnings)
+            transition = validate_real_transition(raw, state, candidate_warnings)
         except GameError as exc:
             repair_count = 1
             session.trace(f"真实结果校验失败：{exc}；请求一次纠错（最多一次）")
             raw = session.call("transition", {**payload, "repair": {
                 "validation_error": str(exc), "previous_response": raw}}, 800)
             try:
-                transition = validate_transition(raw, state, candidate_warnings)
+                transition = validate_real_transition(raw, state, candidate_warnings)
             except GameError as second:
                 raise GameError(f"模型纠错后仍未通过校验，本回合未保存：{second}") from second
         for warning in candidate_warnings:
@@ -65,14 +66,15 @@ class GameController:
         for warning in warnings:
             session.trace(warning)
         # Narrator receives public information only, not raw rollout text or hidden canon.
-        rendered = mapping(session.call("render", {"world": self.context.build(next_state, director=False)}, 800))
+        rendered = mapping(session.call("render", {"world": self.context.build(next_state, director=False),
+                                                   "resolved_event": transition["event"]}, 800))
         if set(rendered) != {"scene"}:
             raise GameError("场景生成响应必须只有 scene 字段")
         next_state.scene = text(rendered["scene"], 6000)
         diagnostics = {"budget": asdict(budget), "search": search.trace,
                        "warnings": candidate_warnings + search.warnings + warnings,
                        "root_visits": search.root.visits, "search_config": asdict(self.config),
-                       "repair_count": repair_count,
+                       "repair_count": repair_count, "prompt_version": PROMPT_VERSION,
                        "reported_total_tokens": (getattr(self.llm, "usage_tokens") - usage_before
                                                  if usage_before is not None else None)}
         self.store.commit(next_state, {"type": "choice", "action": action,

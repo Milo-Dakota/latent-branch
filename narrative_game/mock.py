@@ -36,9 +36,13 @@ class MockLLM:
             proposals = [{"key": key, "value": f"{locations[-1]}保存着一套私下流转的交接记录",
                           "requires": [], "independent": True,
                           "rationale": "记录制度在玩家到来前已经存在，不依赖本次调查结果"}]
-        return {"event": event, "location": location,
+        result = {"event": event, "location": location,
                 "facts": {f"visit.{turn}": f"第{turn}回合，你在{location}完成了：{action}"},
                 "reveal": reveal,
                 "options": [f"调查{location}的交接记录", f"前往{locations[(locations.index(location)+1)%len(locations)]}",
                             "询问附近的知情人", "等待并观察周围"],
                 "proposals": proposals, "quality": 0.72}
+        if payload.get("mode") == "real":
+            result.pop("proposals")
+            result.pop("quality")
+        return result

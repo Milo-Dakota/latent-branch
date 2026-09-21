@@ -179,6 +179,17 @@ def validate_transition(raw: Any, state: WorldState, candidate_warnings: list[st
     return result
 
 
+def validate_real_transition(raw: Any, state: WorldState,
+                             candidate_warnings: list[str] | None = None) -> dict:
+    """Adapt the five-field real/repair protocol to the internal transition shape.
+
+    Only real actions get default search metadata. Counterfactual responses still
+    require a model quality score. Legacy seven-field real responses remain valid.
+    """
+    raw = mapping(raw)
+    return validate_transition({"proposals": [], "quality": 0.0, **raw}, state, candidate_warnings)
+
+
 def apply_transition(state: WorldState, transition: dict, action: str) -> WorldState:
     """Pure transition: simulations and real turns always use isolated copies."""
     t = validate_transition(transition, state)
